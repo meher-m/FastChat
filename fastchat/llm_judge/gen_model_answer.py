@@ -32,6 +32,7 @@ def run_eval(
     max_gpu_memory,
     dtype,
     revision,
+    example
 ):
     questions = load_questions(question_file, question_begin, question_end)
     # random shuffle the questions to balance the loading
@@ -63,6 +64,7 @@ def run_eval(
                 max_gpu_memory,
                 dtype=dtype,
                 revision=revision,
+                example=example
             )
         )
 
@@ -82,6 +84,7 @@ def get_model_answers(
     max_gpu_memory,
     dtype,
     revision,
+    example=None
 ):
     model, tokenizer = load_model(
         model_path,
@@ -105,8 +108,20 @@ def get_model_answers(
         for i in range(num_choices):
             torch.manual_seed(i)
             conv = get_conversation_template(model_id)
+            # import pdb; pdb.set_trace()
+            # Prepend onto the conversation here
+            # Add to conversation.messsages 
+            # (('Human', "text"), ("Assistant", "text"))
+            if example:
+                # example is a list of dictionaries. loop through it and call append_message on each
+                for message in example:
+                    user = "Human" if message["role"] == "user" else "Assistant"
+                    conv.append_message(user, message["content"])
+            # import pdb; pdb.set_trace()
+
             turns = []
             for j in range(len(question["turns"])):
+                # import pdb; pdb.set_trace()
                 qs = question["turns"][j]
                 conv.append_message(conv.roles[0], qs)
                 conv.append_message(conv.roles[1], None)
@@ -172,8 +187,10 @@ def get_model_answers(
                     print("ERROR question ID: ", question["question_id"])
                     output = "ERROR"
 
+                # import pdb; pdb.set_trace()
                 conv.update_last_message(output)
                 turns.append(output)
+                # import pdb; pdb.set_trace()
 
             choices.append({"index": i, "turns": turns})
 
@@ -269,6 +286,12 @@ if __name__ == "__main__":
         default="main",
         help="The model revision to load.",
     )
+    parser.add_argument(
+        "--one_shot_example",
+        type=str,
+        default=None,
+        help="One shot example to use for nuggets OTS experiments"
+    )
 
     args = parser.parse_args()
 
@@ -285,6 +308,9 @@ if __name__ == "__main__":
 
     print(f"Output to {answer_file}")
 
+    print(f"Args.one_shot_example is {args.one_shot_example}")
+
+    one_shot_example = json.loads(args.one_shot_example) if args.one_shot_example else None
     run_eval(
         model_path=args.model_path,
         model_id=args.model_id,
@@ -299,6 +325,7 @@ if __name__ == "__main__":
         max_gpu_memory=args.max_gpu_memory,
         dtype=str_to_torch_dtype(args.dtype),
         revision=args.revision,
+        example=one_shot_example
     )
 
     reorg_answer_file(answer_file)
