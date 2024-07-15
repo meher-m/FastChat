@@ -10,7 +10,6 @@ import random
 
 from datasets import Dataset, DatasetDict, load_from_disk, load_dataset
 from requests.auth import HTTPBasicAuth
-from IPython.display import JSON
 
 
 def parse_arguments():
@@ -57,6 +56,11 @@ def main():
 
     for idx, example in enumerate(messages):
 
+        # Write example to a temporary file
+        tmp_file = f"/tmp/example_{idx}.json"
+        with open(tmp_file, 'w') as f:
+            json.dump(example, f)
+
         # messages = json.loads(example["transformed_task"])["messages"]
 
         # messages = '[{"role": "user", "content": "This is a test user message 1."}, {"role": "assistant", "content": "This is a test assistant message 1."}, {"role": "user", "content": "This is a test user message 2."}, {"role": "assistant", "content": "This is a test assistant message 2."}]'
@@ -64,7 +68,7 @@ def main():
         model_id = f"{args.model_id_prefix}-{idx}"
         # model_id = f"{args.model_id_prefix}-0"
 
-        cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example \'{example}\''
+        cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example {tmp_file}'
 
         print(f"The command is: {cmd}")
 
@@ -72,6 +76,9 @@ def main():
             os.system(cmd)
         except:
             break
+
+        # Delete the temporary file
+        os.remove(tmp_file)
 
     # return
 

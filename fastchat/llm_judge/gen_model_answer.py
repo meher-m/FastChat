@@ -290,7 +290,7 @@ if __name__ == "__main__":
         "--one_shot_example",
         type=str,
         default=None,
-        help="One shot example to use for nuggets OTS experiments"
+        help="Path to local one shot example to use for nuggets OTS experiments"
     )
 
     args = parser.parse_args()
@@ -310,7 +310,14 @@ if __name__ == "__main__":
 
     print(f"Args.one_shot_example is {args.one_shot_example}")
 
-    one_shot_example = json.loads(args.one_shot_example) if args.one_shot_example else None
+    one_shot_example = None
+    if args.one_shot_example:
+        one_shot_path = args.one_shot_example
+        if one_shot_path:
+            with open(one_shot_path, "r") as f:
+                one_shot_example = json.load(f)
+
+    # one_shot_example = json.loads(args.one_shot_example) if args.one_shot_example else None
     run_eval(
         model_path=args.model_path,
         model_id=args.model_id,
