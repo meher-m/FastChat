@@ -153,6 +153,8 @@ if __name__ == "__main__":
         answer_file = f"data/{args.bench_name}/model_answer/{args.model}.jsonl"
     print(f"Output to {answer_file}")
 
+    openai.api_key = args.openai_key
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
         futures = []
         for question in questions:
