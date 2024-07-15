@@ -71,14 +71,11 @@ def main():
     # model_id = f"{args.model_id_prefix}-0"
 
     # cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example {tmp_file}'
-    cmd = f'python gen_api_answer.py --model CodeLlama-7b-Instruct-hf --openai-api-base http://localhost:8000/v1 --parallel 50 --one_shot_example {tmp_file} --openai_key {args.openai_key}'
+    cmd = f'python gen_api_answer.py --model CodeLlama-7b-Instruct-hf --openai-api-base http://localhost:8000/v1 --parallel 50 --one_shot_example {tmp_file} --openai_key {args.openai_key} --index {idx}'
 
     print(f"The command is: {cmd}")
 
-    try:
-        os.system(cmd)
-    except:
-        break
+    os.system(cmd)
 
     # Delete the temporary file
     os.remove(tmp_file)
