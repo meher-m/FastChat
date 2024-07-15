@@ -54,31 +54,32 @@ def main():
     messages = train_ds["messages"]
 
 
-    for idx, example in enumerate(messages):
+    # for idx, example in enumerate(messages):
+    idx, example = 0, messages[0]
 
-        # Write example to a temporary file
-        tmp_file = f"/tmp/example_{idx}.json"
-        with open(tmp_file, 'w') as f:
-            json.dump(example, f)
+    # Write example to a temporary file
+    tmp_file = f"/tmp/example_{idx}.json"
+    with open(tmp_file, 'w') as f:
+        json.dump(example, f)
 
-        # messages = json.loads(example["transformed_task"])["messages"]
+    # messages = json.loads(example["transformed_task"])["messages"]
 
-        # messages = '[{"role": "user", "content": "This is a test user message 1."}, {"role": "assistant", "content": "This is a test assistant message 1."}, {"role": "user", "content": "This is a test user message 2."}, {"role": "assistant", "content": "This is a test assistant message 2."}]'
+    # messages = '[{"role": "user", "content": "This is a test user message 1."}, {"role": "assistant", "content": "This is a test assistant message 1."}, {"role": "user", "content": "This is a test user message 2."}, {"role": "assistant", "content": "This is a test assistant message 2."}]'
 
-        model_id = f"{args.model_id_prefix}-{idx}"
-        # model_id = f"{args.model_id_prefix}-0"
+    model_id = f"{args.model_id_prefix}-{idx}"
+    # model_id = f"{args.model_id_prefix}-0"
 
-        cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example {tmp_file}'
+    cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example {tmp_file}'
 
-        print(f"The command is: {cmd}")
+    print(f"The command is: {cmd}")
 
-        try:
-            os.system(cmd)
-        except:
-            break
+    try:
+        os.system(cmd)
+    except:
+        break
 
-        # Delete the temporary file
-        os.remove(tmp_file)
+    # Delete the temporary file
+    os.remove(tmp_file)
 
     # return
 
