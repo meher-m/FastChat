@@ -20,6 +20,7 @@ def parse_arguments():
     # parser.add_argument('--generation_dir', type=str, help='Directory to save generations to. Will be prepended by ~/bigcode-evaluation-harness/bigcode_eval/tasks/')
     parser.add_argument('--model_path', type=str, default="codellama/CodeLlama-7b-Instruct-hf", help='Name of the hf model to be used for generation')
     parser.add_argument('--model_id_prefix', type=str, default="code-llama-7b-instruct", help='Name you want to save the model as. ')
+    parser.add_argument('--openai_key', type=str, default=None)
     # parser.add_argument('--use_chat_template', action="store_true", help='Use the chat template for generation')
     return parser.parse_args()
 
@@ -69,7 +70,8 @@ def main():
     model_id = f"{args.model_id_prefix}-{idx}"
     # model_id = f"{args.model_id_prefix}-0"
 
-    cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example {tmp_file}'
+    # cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example {tmp_file}'
+    cmd = f'python gen_api_answer.py --model CodeLlama-7b-Instruct-hf --openai-api-base http://localhost:8000/v1 --parallel 50 --one_shot_example {tmp_file} --openai_key {args.openai_key}'
 
     print(f"The command is: {cmd}")
 

@@ -25,7 +25,13 @@ from fastchat.model.model_adapter import get_conversation_template, ANTHROPIC_MO
 
 
 def get_answer(
-    question: dict, model: str, num_choices: int, max_tokens: int, answer_file: str
+    question: dict, 
+    model: str, 
+    num_choices: int, 
+    max_tokens: int, 
+    answer_file: str, 
+    one_shot_example_path: str,
+    openai_key: str
 ):
     assert (
         args.force_temperature is not None and "required_temperature" in question.keys()
@@ -43,6 +49,14 @@ def get_answer(
     chat_state = None  # for palm-2 model
     for i in range(num_choices):
         conv = get_conversation_template(model)
+
+        if one_shot_example_path:
+            example = None
+            with open(one_shot_example_path, "r") as f:
+                example = json.load(f)
+            for message in example:
+                user = "Human" if message["role"] == "user" else "Assistant"
+                conv.append_message(user, message["content"])
 
         turns = []
         for j in range(len(question["turns"])):
@@ -114,6 +128,17 @@ if __name__ == "__main__":
         "--parallel", type=int, default=1, help="The number of concurrent API calls."
     )
     parser.add_argument("--openai-api-base", type=str, default=None)
+    parser.add_argument(
+        "--one_shot_example",
+        type=str,
+        default=None,
+        help="Path to local one shot example to use for nuggets OTS experiments"
+    )
+    parser.add_argument(
+        "--openai_key",
+        type=str,
+        default=None
+    )
     args = parser.parse_args()
 
     if args.openai_api_base is not None:
@@ -138,6 +163,8 @@ if __name__ == "__main__":
                 args.num_choices,
                 args.max_tokens,
                 answer_file,
+                args.one_shot_example,
+                args.openai_key
             )
             futures.append(future)
 
