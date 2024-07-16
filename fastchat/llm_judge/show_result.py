@@ -131,7 +131,7 @@ if __name__ == "__main__":
         "--nuggets_one_shot", type=int, default=0, help="If zero, no one shot. Else, number specifies number of runs of one_shot nuggets. "
     )
     parser.add_argument(
-        "--result_file", type=str, default="data/mt_bench/model_judgement/results.csv", help="The file to save the results."
+        "--result_file", type=str, default="/FastChat/fastchat/llm_judge/data/mt_bench/model_judgment/results.csv", help="The file to save the results."
     )
     args = parser.parse_args()
 
