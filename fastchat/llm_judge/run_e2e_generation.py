@@ -54,31 +54,29 @@ def main():
     train_ds = s3_dataset["train"]
     messages = train_ds["messages"]
 
+    for idx, example in enumerate(messages[:2]):
 
-    # for idx, example in enumerate(messages):
-    idx, example = 0, messages[0]
+        # Write example to a temporary file
+        tmp_file = f"/tmp/example_{idx}.json"
+        with open(tmp_file, 'w') as f:
+            json.dump(example, f)
 
-    # Write example to a temporary file
-    tmp_file = f"/tmp/example_{idx}.json"
-    with open(tmp_file, 'w') as f:
-        json.dump(example, f)
+        # messages = json.loads(example["transformed_task"])["messages"]
 
-    # messages = json.loads(example["transformed_task"])["messages"]
+        # messages = '[{"role": "user", "content": "This is a test user message 1."}, {"role": "assistant", "content": "This is a test assistant message 1."}, {"role": "user", "content": "This is a test user message 2."}, {"role": "assistant", "content": "This is a test assistant message 2."}]'
 
-    # messages = '[{"role": "user", "content": "This is a test user message 1."}, {"role": "assistant", "content": "This is a test assistant message 1."}, {"role": "user", "content": "This is a test user message 2."}, {"role": "assistant", "content": "This is a test assistant message 2."}]'
+        model_id = f"{args.model_id_prefix}-{idx}"
+        # model_id = f"{args.model_id_prefix}-0"
 
-    model_id = f"{args.model_id_prefix}-{idx}"
-    # model_id = f"{args.model_id_prefix}-0"
+        # cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example {tmp_file}'
+        cmd = f'python gen_api_answer.py --model CodeLlama-7b-Instruct-hf --openai-api-base http://localhost:8000/v1 --parallel 50 --one_shot_example {tmp_file} --openai_key {args.openai_key} --index {idx}'
 
-    # cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example {tmp_file}'
-    cmd = f'python gen_api_answer.py --model CodeLlama-7b-Instruct-hf --openai-api-base http://localhost:8000/v1 --parallel 50 --one_shot_example {tmp_file} --openai_key {args.openai_key} --index {idx}'
+        print(f"The command is: {cmd}")
 
-    print(f"The command is: {cmd}")
+        os.system(cmd)
 
-    os.system(cmd)
-
-    # Delete the temporary file
-    os.remove(tmp_file)
+        # Delete the temporary file
+        os.remove(tmp_file)
 
     # return
 
