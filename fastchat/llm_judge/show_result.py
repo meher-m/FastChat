@@ -19,8 +19,15 @@ def display_result_single(args):
     df = df_all[["model", "score", "turn"]]
     df = df[df["score"] != -1]
 
+    models = []
+    if args.nuggets_one_shot != 0:
+        for i in range(args.nuggets_one_shot):
+            models.append(f"{args.model_list[0]}_{i}")
+    else:
+        models = args.model_list
+
     if args.model_list is not None:
-        df = df[df["model"].isin(args.model_list)]
+        df = df[df["model"].isin(models)]
 
     print("\n########## First turn ##########")
     df_1 = df[df["turn"] == 1].groupby(["model", "turn"]).mean()
@@ -116,6 +123,9 @@ if __name__ == "__main__":
             "`pairwise-all` runs pairwise comparision between all pairs. "
             "`single` runs single answer grading."
         ),
+    )
+    parser.add_argument(
+        "--nuggets_one_shot", type=int, default=0, help="If zero, no one shot. Else, number specifies number of runs of one_shot nuggets. "
     )
     args = parser.parse_args()
 
