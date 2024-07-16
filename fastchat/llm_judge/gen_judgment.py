@@ -207,6 +207,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--first-n", type=int, help="A debug option. Only run the first `n` judgments."
     )
+    parser.add_argument(
+        "--nuggets_one_shot", type=int, default=0, help="If zero, no one shot. Else, number specifies number of runs of one_shot nuggets. "
+    )
     args = parser.parse_args()
 
     question_file = f"data/{args.bench_name}/question.jsonl"
@@ -229,7 +232,14 @@ if __name__ == "__main__":
     if args.model_list is None:
         models = get_model_list(answer_dir)
     else:
-        models = args.model_list
+        # Make a element in this list for each one_shot_index because the models are saved as Meta-Llama-3-8B-Instruct_0 for example
+        # This will only work if there is one model in args.model_list
+        models = []
+        if args.nuggets_one_shot != 0:
+            for i in range(args.nuggets_one_shot):
+                models.append(f"{args.model_list[0]}_{i}")
+        else:
+            models = args.model_list
 
     if args.mode == "single":
         judges = make_judge_single(args.judge_model, judge_prompts)

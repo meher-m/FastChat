@@ -18,7 +18,7 @@ def parse_arguments():
     # parser.add_argument("--tmp_generation_dir", type=str, default="vllm_few_shot_examples", help="Directory to save temporary generations to")
     # parser.add_argument('--s3_dataset_path', type=str, help='Path to read dataset from S3. Should end in /dataset/')
     # parser.add_argument('--generation_dir', type=str, help='Directory to save generations to. Will be prepended by ~/bigcode-evaluation-harness/bigcode_eval/tasks/')
-    parser.add_argument('--model_path', type=str, default="codellama/CodeLlama-7b-Instruct-hf", help='Name of the hf model to be used for generation')
+    parser.add_argument('--model', type=str, default="codellama/CodeLlama-7b-Instruct-hf", help='Name of the hf model to be used for generation')
     parser.add_argument('--model_id_prefix', type=str, default="code-llama-7b-instruct", help='Name you want to save the model as. ')
     parser.add_argument('--openai_key', type=str, default=None)
     # parser.add_argument('--use_chat_template', action="store_true", help='Use the chat template for generation')
@@ -69,7 +69,7 @@ def main():
         # model_id = f"{args.model_id_prefix}-0"
 
         # cmd = f'CUDA_VISIBLE_DEVICES=6,7 python gen_model_answer.py --model-path {args.model_path} --model-id {model_id} --one_shot_example {tmp_file}'
-        cmd = f'python gen_api_answer.py --model CodeLlama-7b-Instruct-hf --openai-api-base http://localhost:8000/v1 --parallel 50 --one_shot_example {tmp_file} --openai_key {args.openai_key} --index {idx}'
+        cmd = f'python gen_api_answer.py --model {args.model} --openai-api-base http://localhost:8000/v1 --parallel 50 --one_shot_example {tmp_file} --openai_key {args.openai_key} --index {idx}'
 
         print(f"The command is: {cmd}")
 

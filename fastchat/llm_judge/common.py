@@ -107,7 +107,7 @@ def load_model_answers(answer_dir: str):
     model_answers = {}
 
     for filename in filenames:
-        model_name = os.path.basename(filename)[:-6]
+        model_name = os.path.basename(filename)[:-6] # to remove .jsonl (6 characters)
         answer = {}
         with open(filename) as fin:
             for line in fin:
