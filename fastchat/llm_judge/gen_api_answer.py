@@ -141,7 +141,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--index',
-        type=int
+        type=int,
+        default=-1
     )
     args = parser.parse_args()
 
@@ -154,7 +155,10 @@ if __name__ == "__main__":
     if args.answer_file:
         answer_file = args.answer_file
     else:
-        answer_file = f"data/{args.bench_name}/model_answer/{args.model}_{args.index}.jsonl"
+        if args.index == -1:
+            answer_file = f"data/{args.bench_name}/model_answer/{args.model}_baseline.jsonl"
+        else:
+            answer_file = f"data/{args.bench_name}/model_answer/{args.model}_{args.index}.jsonl"
     print(f"Output to {answer_file}")
 
     openai.api_key = args.openai_key

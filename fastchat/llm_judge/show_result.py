@@ -42,6 +42,9 @@ def display_result_single(args):
         df_3 = df[["model", "score"]].groupby(["model"]).mean()
         print(df_3.sort_values(by="score", ascending=False))
 
+    df_1.to_csv(args.result_file, mode='a', header=True)
+    df_2.to_csv(args.result_file, mode='a', header=False)
+    df_3.to_csv(args.result_file, mode='a', header=False)
 
 def display_result_pairwise(args):
     if args.input_file is None:
@@ -126,6 +129,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--nuggets_one_shot", type=int, default=0, help="If zero, no one shot. Else, number specifies number of runs of one_shot nuggets. "
+    )
+    parser.add_argument(
+        "--result_file", type=str, default="data/mt_bench/model_judgement/results.csv", help="The file to save the results."
     )
     args = parser.parse_args()
 

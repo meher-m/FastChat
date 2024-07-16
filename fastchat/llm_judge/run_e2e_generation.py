@@ -54,6 +54,10 @@ def main():
     train_ds = s3_dataset["train"]
     messages = train_ds["messages"]
 
+    zeroshot_baseline_cmd = cmd = f'python gen_api_answer.py --model {args.model} --openai-api-base http://localhost:8000/v1 --parallel 50 --openai_key {args.openai_key}'
+    print(f"The command is: {cmd}")
+    os.system(zeroshot_baseline_cmd)
+
     for idx, example in enumerate(messages[:2]):
 
         # Write example to a temporary file
