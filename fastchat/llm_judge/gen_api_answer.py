@@ -30,8 +30,9 @@ def get_answer(
     num_choices: int, 
     max_tokens: int, 
     answer_file: str, 
-    one_shot_example_path: str,
-    openai_key: str
+    one_shot_example_path: str = None,
+    example_from_mtbench: dict = None,
+    example_idx_from_mtbench: int = -1
 ):
     assert (
         args.force_temperature is not None and "required_temperature" in question.keys()
@@ -57,6 +58,24 @@ def get_answer(
             for message in example:
                 user = "Human" if message["role"] == "user" else "Assistant"
                 conv.append_message(user, message["content"])
+        elif example_from_mtbench:
+            # This code should use a mtbench one-shot example.. 
+            # Need to test that it works as expected. 
+            turns = example_from_mtbench["turns"]
+            lines = []
+            with open("/data/mt_bench/reference_answer/gpt-4.jsonl", "r") as f:
+                for line in f:
+                    if line:
+                        lines.append(json.loads(line))
+            answers = None
+            for line in lines:
+                if line["question_id"] == example_idx_from_mtbench:
+                    answers = line["choices"][0]["turns"]
+                    break
+            assert len(turns) == len(answers)
+            for j in range(len(turns)):
+                conv.append_message("Human", turns[j])
+                conv.append_message("Assistant", answers[j])
 
         turns = []
         for j in range(len(question["turns"])):
@@ -144,6 +163,11 @@ if __name__ == "__main__":
         type=int,
         default=-1
     )
+    parser.add_argument(
+        '--example_from_mtbench',
+        type=int,
+        default=-1
+    )
     args = parser.parse_args()
 
     if args.openai_api_base is not None:
@@ -155,13 +179,17 @@ if __name__ == "__main__":
     if args.answer_file:
         answer_file = args.answer_file
     else:
-        if args.index == -1:
+        if args.index == -1 and args.example_from_mtbench == -1:
             answer_file = f"data/{args.bench_name}/model_answer/{args.model}_baseline.jsonl"
+        elif args.example_from_mtbench != -1:
+            answer_file = f"data/{args.bench_name}/model_answer/{args.model}_mtbench{args.example_from_mtbench}.jsonl"
         else:
             answer_file = f"data/{args.bench_name}/model_answer/{args.model}_{args.index}.jsonl"
     print(f"Output to {answer_file}")
 
     openai.api_key = args.openai_key
+
+    mtbench_example = questions[args.example_from_mtbench] if args.example_from_mtbench != -1 else None
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
         futures = []
@@ -174,7 +202,8 @@ if __name__ == "__main__":
                 args.max_tokens,
                 answer_file,
                 args.one_shot_example,
-                args.openai_key
+                mtbench_example,
+                args.example_from_mtbench
             )
             futures.append(future)
 
