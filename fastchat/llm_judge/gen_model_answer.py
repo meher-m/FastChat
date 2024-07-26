@@ -98,7 +98,12 @@ def get_model_answers(
         debug=False,
     )
 
+    start_time = time.time()
+    count_num_questions = 0
+    count_num_choices = 0
+    count_num_turns = 0
     for question in tqdm(questions):
+        count_num_questions += 1
         if question["category"] in temperature_config:
             temperature = temperature_config[question["category"]]
         else:
@@ -106,6 +111,7 @@ def get_model_answers(
 
         choices = []
         for i in range(num_choices):
+            count_num_choices += 1
             torch.manual_seed(i)
             conv = get_conversation_template(model_id)
             # import pdb; pdb.set_trace()
@@ -121,6 +127,7 @@ def get_model_answers(
 
             turns = []
             for j in range(len(question["turns"])):
+                count_num_turns += 1
                 # import pdb; pdb.set_trace()
                 qs = question["turns"][j]
                 conv.append_message(conv.roles[0], qs)
@@ -205,6 +212,10 @@ def get_model_answers(
                 "tstamp": time.time(),
             }
             fout.write(json.dumps(ans_json) + "\n")
+
+    end_time = time.time()
+    with open("accelerate_timing_result.txt", "a") as f:
+        f.write(f"num_questions: {count_num_questions}, num_choices: {count_num_choices}, num_turns: {count_num_turns}, time: {end_time - start_time}\n")
 
 
 def reorg_answer_file(answer_file):

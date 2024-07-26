@@ -47,7 +47,11 @@ def get_answer(
 
     choices = []
     chat_state = None  # for palm-2 model
+    count_num_choices = 0
+    count_num_turns = 0
+    start_time = time.time()
     for i in range(num_choices):
+        count_num_choices += 1
         conv = get_conversation_template(model)
 
         if one_shot_example_path:
@@ -60,6 +64,7 @@ def get_answer(
 
         turns = []
         for j in range(len(question["turns"])):
+            count_num_turns += 1
             conv.append_message(conv.roles[0], question["turns"][j])
             conv.append_message(conv.roles[1], None)
 
@@ -77,6 +82,9 @@ def get_answer(
 
         choices.append({"index": i, "turns": turns})
 
+    end_time = time.time()
+    with open("vllm_timing_result.txt", "a") as f:
+        f.write(f"num_choices: {count_num_choices}, num_turns: {count_num_turns}, time: {end_time - start_time}\n")
     # Dump answers
     ans = {
         "question_id": question["question_id"],
